@@ -5,15 +5,19 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
+import com.badlogic.gdx.utils.Logger;
+import io.github.dashpulse.component.PhysicsComponent;
 import io.github.dashpulse.component.PositionComponent;
 import io.github.dashpulse.component.TextureComponent;
 
 
+
 public class RenderSystem extends IteratingSystem {
     private final Batch batch;
+    private static final Logger logger = new Logger(RenderSystem.class.getName(), Logger.DEBUG);
 
     public RenderSystem(Batch batch) {
-        super(Family.all(PositionComponent.class, TextureComponent.class).get());
+        super(Family.all(TextureComponent.class, PhysicsComponent.class).get());
         this.batch = batch;
     }
 
@@ -26,16 +30,19 @@ public class RenderSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        PositionComponent position = entity.getComponent(PositionComponent.class);
         TextureComponent texture = entity.getComponent(TextureComponent.class);
+        PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
 
-
-        if (texture.texture == null) {
+        if (texture.texture == null || physics == null) {
             return;
         }
 
-        batch.draw(texture.texture, position.x, position.y);
-    }
+        // Get the position from the physics body
+        float x = physics.body.getPosition().x;
+        float y = physics.body.getPosition().y;
 
+        logger.debug("Rendering entity at x: " + x + ", y: " + y);
+        batch.draw(texture.texture, x, y);
+    }
 }
 
