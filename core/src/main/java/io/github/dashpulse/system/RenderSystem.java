@@ -44,7 +44,7 @@ public class RenderSystem extends IteratingSystem {
         float width = texture.texture.getRegionWidth() / 2f;
         float height = texture.texture.getRegionHeight() / 2f;
 
-//        logger.debug("Renderiddng entity at x: " + x + ", y: " + y);
+        logger.debug("Renderiddng entity at x: " + x + ", y: " + y);
 
         // Render the entity at the new position
         batch.draw(texture.texture, x - width, y - height);

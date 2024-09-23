@@ -7,7 +7,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Logger;
 import io.github.dashpulse.component.MoveComponent;
 import io.github.dashpulse.component.PlayerComponent;
-import io.github.dashpulse.system.PhysicSystem;
 
 public class PlayerKeyboardInputProcessor extends InputAdapter {
     private static final Logger logger = new Logger(PlayerKeyboardInputProcessor.class.getName(), Logger.DEBUG);
@@ -50,7 +49,7 @@ public class PlayerKeyboardInputProcessor extends InputAdapter {
                         moveComponent.cosAngle = -value;
                         break;
                 }
-                // Normalize the angles to get a diagonal movement effect
+                // Normalize the angles to allow diagonal movement
                 if (moveComponent.cosAngle != 0 || moveComponent.sinAngle != 0) {
                     float length = (float) Math.sqrt(moveComponent.cosAngle * moveComponent.cosAngle + moveComponent.sinAngle * moveComponent.sinAngle);
                     moveComponent.cosAngle /= length;
@@ -59,6 +58,5 @@ public class PlayerKeyboardInputProcessor extends InputAdapter {
                 logger.debug("cosAngle: " + moveComponent.cosAngle + ", sinAngle: " + moveComponent.sinAngle);
             }
         }
-
     }
 }

@@ -62,6 +62,8 @@ public class GameScreen implements Screen {
 
         // Create the player entity
         player = new Entity();
+        PlayerComponent playerComponent = new PlayerComponent();
+        player.add(playerComponent);
 
         PositionComponent positionComponent = new PositionComponent(2, 4); // Initial position
         player.add(positionComponent);

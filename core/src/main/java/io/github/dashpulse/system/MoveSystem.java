@@ -21,21 +21,15 @@ public class MoveSystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         MoveComponent move = moveComponentMapper.get(entity);
         PhysicsComponent physics = physicsComponentMapper.get(entity);
+
         if (move != null && physics != null) {
-            float desiredVelocityX = move.cosAngle * move.speed;
-            float desiredVelocityY = move.sinAngle * move.speed;
+            // Calculate the desired velocity based on movement direction
+            float desiredVelocityX = move.cosAngle * move.speed * deltaTime;
+            float desiredVelocityY = move.sinAngle * move.speed * deltaTime;
 
-            // Get the current velocity
-            var currentVelocity = physics.body.getLinearVelocity();
-
-            // Calculate the impulse to apply
-            var impulseX = desiredVelocityX - currentVelocity.x;
-            var impulseY = desiredVelocityY - currentVelocity.y;
-
-            // Apply the impulse to the body
-            logger.debug("Applying impulse: " + impulseX + ", " + impulseY);
-            physics.body.applyLinearImpulse(impulseX, impulseY, physics.body.getWorldCenter().x, physics.body.getWorldCenter().y, true);
+            // Apply the velocity to the physics body
+            physics.body.setLinearVelocity(desiredVelocityX, desiredVelocityY);
+            logger.debug("Moving entity with velocity: " + desiredVelocityX + ", " + desiredVelocityY);
         }
     }
 }
-
