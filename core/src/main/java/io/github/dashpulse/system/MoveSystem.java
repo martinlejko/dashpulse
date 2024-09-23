@@ -22,7 +22,6 @@ public class MoveSystem extends IteratingSystem {
         MoveComponent move = moveComponentMapper.get(entity);
         PhysicsComponent physics = physicsComponentMapper.get(entity);
         if (move != null && physics != null) {
-            // Calculate the desired velocity
             float desiredVelocityX = move.cosAngle * move.speed;
             float desiredVelocityY = move.sinAngle * move.speed;
 
@@ -34,7 +33,7 @@ public class MoveSystem extends IteratingSystem {
             var impulseY = desiredVelocityY - currentVelocity.y;
 
             // Apply the impulse to the body
-//            logger.debug("Applying impulse: " + impulseX + ", " + impulseY);
+            logger.debug("Applying impulse: " + impulseX + ", " + impulseY);
             physics.body.applyLinearImpulse(impulseX, impulseY, physics.body.getWorldCenter().x, physics.body.getWorldCenter().y, true);
         }
     }

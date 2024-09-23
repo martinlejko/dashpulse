@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 
 import com.badlogic.gdx.utils.Logger;
 import io.github.dashpulse.component.PhysicsComponent;
-import io.github.dashpulse.component.PositionComponent;
 import io.github.dashpulse.component.TextureComponent;
 
 
@@ -34,15 +33,21 @@ public class RenderSystem extends IteratingSystem {
         PhysicsComponent physics = entity.getComponent(PhysicsComponent.class);
 
         if (texture.texture == null || physics == null) {
+//            logger.debug("Texture or physics component is null for entity");
             return;
         }
 
-        // Get the position from the physics body
+        // Get the current position of the physics body
         float x = physics.body.getPosition().x;
         float y = physics.body.getPosition().y;
 
-        logger.debug("Rendering entity at x: " + x + ", y: " + y);
-        batch.draw(texture.texture, x, y);
+        float width = texture.texture.getRegionWidth() / 2f;
+        float height = texture.texture.getRegionHeight() / 2f;
+
+//        logger.debug("Renderiddng entity at x: " + x + ", y: " + y);
+
+        // Render the entity at the new position
+        batch.draw(texture.texture, x - width, y - height);
     }
 }
 

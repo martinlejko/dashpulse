@@ -17,6 +17,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.dashpulse.component.*;
 import io.github.dashpulse.event.MapChangeEvent;
@@ -37,10 +38,6 @@ public class GameScreen implements Screen {
     private TextureAtlas textureAtlas;
     private Entity player;
 
-    // For Tiled Map
-    private TiledMap tiledMap;
-    private OrthogonalTiledMapRenderer mapRenderer;
-    private OrthographicCamera camera;
 
     @Override
     public void show() {
@@ -50,44 +47,38 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         textureAtlas = new TextureAtlas("graphics/GameObjects.atlas");
 
-        // Initialize Camera
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 16f, 9f); // Set camera size to match your viewport (16:9)
-
-        // Load the Tiled map
-        tiledMap = new TmxMapLoader().load("maps/mapa.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(tiledMap, 1 / 16f); // Scale the map appropriately
+        Image image2 = new Image(textureAtlas.findRegion("idle"));
+        image2.setPosition(100, 100);
 
         PlayerKeyboardInputProcessor playerKeyboardInputProcessor = new PlayerKeyboardInputProcessor(engine);
-        // Add systems to the engine
-        engine.addSystem(new RenderSystem(batch));
-        engine.addSystem(new MoveSystem());
+
+        stage.addActor(image2);
+
         engine.addSystem(new AnimationSystem(textureAtlas));
         engine.addSystem(new PhysicSystem(world));
-        engine.addSystem(new DebugSystem(world, camera));
+        engine.addSystem(new MoveSystem());
+        engine.addSystem(new RenderSystem(batch));
+
 
         // Create the player entity
         player = new Entity();
-        PlayerComponent playerComponent = new PlayerComponent();
-        player.add(playerComponent);
 
         PositionComponent positionComponent = new PositionComponent(2, 4); // Initial position
         player.add(positionComponent);
 
-        TextureComponent textureComponent = new TextureComponent();
-        player.add(textureComponent);
-
         MoveComponent moveComponent = new MoveComponent();
         player.add(moveComponent);
 
+        TextureComponent textureComponent = new TextureComponent();
+        player.add(textureComponent);
+
         CircleShape circleShape = new CircleShape();
         circleShape.setRadius(0.5f);
-
         PhysicsComponent physicsComponent = PhysicsComponent.create(world, 0, 0, BodyDef.BodyType.DynamicBody, circleShape, 1, 0);
         player.add(physicsComponent);
 
         AnimationComponent animationComponent = new AnimationComponent();
-        Animation<TextureRegion> idleAnimation = new Animation<>(1 / 8f, textureAtlas.findRegions("idle"));
+        Animation<TextureRegion> idleAnimation = new Animation<>(1 / 8f, textureAtlas.findRegions("run"));
         animationComponent.animation = idleAnimation;
         player.add(animationComponent);
 
@@ -99,33 +90,16 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1); // Set clear color
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
 
-        // Update the physics world
-        world.step(delta, 6, 2); // Step the physics world
+        world.step(delta, 6, 2);
+        stage.act(delta);
+        stage.draw();
 
-        // Retrieve the player's position
-        PositionComponent positionComponent = player.getComponent(PositionComponent.class);
-        if (positionComponent != null) {
-            // Center the camera around the player's position
-            camera.position.set(positionComponent.x, positionComponent.y, 0);
-        }
 
-        // Update the camera and apply it to the renderer
-        camera.update();
-        mapRenderer.setView(camera);
-
-        // Render the Tiled map first (as background)
-        mapRenderer.render();
-
-        // Render the game entities
         engine.update(delta); // Update all systems including the debug renderer
     }
 
     @Override
     public void resize(int width, int height) {
-        // Update camera on resize
-        camera.viewportWidth = 16f;
-        camera.viewportHeight = 9f * (float) height / (float) width;
-        camera.update();
     }
 
     @Override
@@ -147,10 +121,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         batch.dispose();
         textureAtlas.dispose();
-        tiledMap.dispose();
-        mapRenderer.dispose();
         stage.dispose();
-        world.dispose();
     }
 }
 

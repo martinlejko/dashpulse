@@ -6,12 +6,14 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Logger;
 import io.github.dashpulse.component.AnimationComponent;
 import io.github.dashpulse.component.TextureComponent;
 
 import java.util.HashMap;
 
 public class AnimationSystem extends IteratingSystem {
+    private static final Logger logger = new Logger(MoveSystem.class.getName(), Logger.DEBUG);
     private final TextureAtlas textureAtlas;
     private final HashMap<String, Animation<TextureRegion>> animationCache = new HashMap<>();
 

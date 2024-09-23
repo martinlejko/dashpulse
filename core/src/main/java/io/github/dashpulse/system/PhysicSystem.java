@@ -39,8 +39,11 @@ public class PhysicSystem extends IteratingSystem {
         PositionComponent positionComponent = entity.getComponent(PositionComponent.class);
 
         if (physicsComponent != null && positionComponent != null) {
-            physicsComponent.body.setTransform(positionComponent.x, positionComponent.y, physicsComponent.body.getAngle());
-        }
+            positionComponent.x = physicsComponent.body.getPosition().x;
+            positionComponent.y = physicsComponent.body.getPosition().y;
 
+            physicsComponent.body.setTransform(positionComponent.x, positionComponent.y, physicsComponent.body.getAngle());
+            logger.debug("Updated position for entity to: x: " + positionComponent.x + ", y: " + positionComponent.y);
+        }
     }
 }
