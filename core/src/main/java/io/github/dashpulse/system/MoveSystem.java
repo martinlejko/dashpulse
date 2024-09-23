@@ -24,19 +24,29 @@ public class MoveSystem extends IteratingSystem {
         PhysicsComponent physics = physicsComponentMapper.get(entity);
 
         if (move != null && physics != null) {
-            // Calculate the desired velocity based on movement direction
-            float desiredVelocityX = move.cosAngle * move.speed;
-            float desiredVelocityY = move.sinAngle * move.speed;
-
-            // Set the linear velocity directly
-            physics.body.setLinearVelocity(desiredVelocityX, desiredVelocityY);
-
-            // Limit the maximum velocity to prevent sliding or excessive speeds
-            if (physics.body.getLinearVelocity().len() > MAX_VELOCITY) {
-                physics.body.setLinearVelocity(physics.body.getLinearVelocity().nor().scl(MAX_VELOCITY));
+            // Update the cooldown timer
+            if (move.blinkCooldownTimer > 0) {
+                move.blinkCooldownTimer -= deltaTime;
             }
 
-            logger.debug("Moving entity with velocity: " + desiredVelocityX + ", " + desiredVelocityY);
+            if (move.isBlinking && move.blinkPosition != null && move.blinkCooldownTimer <= 0) {
+                // Update the position to the blink position
+                physics.body.setTransform(move.blinkPosition, physics.body.getAngle());
+                move.isBlinking = false; // Reset the blinking flag
+                move.blinkCooldownTimer = move.blinkCooldown; // Reset the cooldown timer
+            } else {
+                // Calculate the desired velocity based on movement direction
+                float desiredVelocityX = move.cosAngle * move.speed;
+                float desiredVelocityY = move.sinAngle * move.speed;
+
+                // Set the linear velocity directly
+                physics.body.setLinearVelocity(desiredVelocityX, desiredVelocityY);
+
+                // Limit the maximum velocity to prevent sliding or excessive speeds
+                if (physics.body.getLinearVelocity().len() > MAX_VELOCITY) {
+                    physics.body.setLinearVelocity(physics.body.getLinearVelocity().nor().scl(MAX_VELOCITY));
+                }
+            }
         }
     }
 }

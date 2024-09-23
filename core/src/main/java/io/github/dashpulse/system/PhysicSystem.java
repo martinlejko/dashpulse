@@ -43,7 +43,7 @@ public class PhysicSystem extends IteratingSystem {
             positionComponent.y = physicsComponent.body.getPosition().y;
 
             physicsComponent.body.setTransform(positionComponent.x, positionComponent.y, physicsComponent.body.getAngle());
-            logger.debug("Updated position for entity to: x: " + positionComponent.x + ", y: " + positionComponent.y);
+//            logger.debug("Updated position for entity to: x: " + positionComponent.x + ", y: " + positionComponent.y);
         }
     }
 }
