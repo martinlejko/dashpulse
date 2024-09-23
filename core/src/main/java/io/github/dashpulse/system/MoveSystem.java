@@ -12,6 +12,7 @@ public class MoveSystem extends IteratingSystem {
     private static final Logger logger = new Logger(MoveSystem.class.getName(), Logger.DEBUG);
     private final ComponentMapper<MoveComponent> moveComponentMapper = ComponentMapper.getFor(MoveComponent.class);
     private final ComponentMapper<PhysicsComponent> physicsComponentMapper = ComponentMapper.getFor(PhysicsComponent.class);
+    private static final float MAX_VELOCITY = 100f; // Set your maximum desired velocity
 
     public MoveSystem() {
         super(Family.all(MoveComponent.class, PhysicsComponent.class).get());
@@ -24,11 +25,17 @@ public class MoveSystem extends IteratingSystem {
 
         if (move != null && physics != null) {
             // Calculate the desired velocity based on movement direction
-            float desiredVelocityX = move.cosAngle * move.speed * deltaTime;
-            float desiredVelocityY = move.sinAngle * move.speed * deltaTime;
+            float desiredVelocityX = move.cosAngle * move.speed;
+            float desiredVelocityY = move.sinAngle * move.speed;
 
-            // Apply the velocity to the physics body
+            // Set the linear velocity directly
             physics.body.setLinearVelocity(desiredVelocityX, desiredVelocityY);
+
+            // Limit the maximum velocity to prevent sliding or excessive speeds
+            if (physics.body.getLinearVelocity().len() > MAX_VELOCITY) {
+                physics.body.setLinearVelocity(physics.body.getLinearVelocity().nor().scl(MAX_VELOCITY));
+            }
+
             logger.debug("Moving entity with velocity: " + desiredVelocityX + ", " + desiredVelocityY);
         }
     }

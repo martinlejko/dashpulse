@@ -8,10 +8,15 @@ import com.badlogic.gdx.utils.Logger;
 import io.github.dashpulse.component.MoveComponent;
 import io.github.dashpulse.component.PlayerComponent;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PlayerKeyboardInputProcessor extends InputAdapter {
-    private static final Logger logger = new Logger(PlayerKeyboardInputProcessor.class.getName(), Logger.DEBUG);
+    private final Set<Integer> pressedKeys = new HashSet<>();
     private final Engine engine;
     private final ComponentMapper<MoveComponent> moveMapper;
+    private float playerCos = 0f;
+    private float playerSin = 0f;
 
     public PlayerKeyboardInputProcessor(Engine engine) {
         this.engine = engine;
@@ -21,42 +26,58 @@ public class PlayerKeyboardInputProcessor extends InputAdapter {
 
     @Override
     public boolean keyDown(int keycode) {
-        updateMovement(keycode, 1f);
-        return true;
+        if (isMovementKey(keycode)) {
+            pressedKeys.add(keycode);
+            updateMovement();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        updateMovement(keycode, 0f);
+        pressedKeys.remove(keycode);
+        updateMovement();
         return true;
     }
 
-    private void updateMovement(int keycode, float value) {
+    private void updateMovement() {
+        playerCos = 0f;
+        playerSin = 0f;
+
+        if (pressedKeys.contains(Input.Keys.W)) {
+            playerSin = 1f;
+        }
+        if (pressedKeys.contains(Input.Keys.S)) {
+            playerSin = -1f;
+        }
+        if (pressedKeys.contains(Input.Keys.D)) {
+            playerCos = 1f;
+        }
+        if (pressedKeys.contains(Input.Keys.A)) {
+            playerCos = -1f;
+        }
+
+        // Normalize angles to allow for diagonal movement
+        if (playerCos != 0 || playerSin != 0) {
+            float length = (float) Math.sqrt(playerCos * playerCos + playerSin * playerSin);
+            playerCos /= length;
+            playerSin /= length;
+        }
+
+        // Update movement component for the player entity (this part depends on your system)
+        // For example:
         for (Entity entity : engine.getEntitiesFor(Family.all(PlayerComponent.class).get())) {
             MoveComponent moveComponent = moveMapper.get(entity);
             if (moveComponent != null) {
-                switch (keycode) {
-                    case Input.Keys.W:
-                        moveComponent.sinAngle = value;
-                        break;
-                    case Input.Keys.S:
-                        moveComponent.sinAngle = -value;
-                        break;
-                    case Input.Keys.D:
-                        moveComponent.cosAngle = value;
-                        break;
-                    case Input.Keys.A:
-                        moveComponent.cosAngle = -value;
-                        break;
-                }
-                // Normalize the angles to allow diagonal movement
-                if (moveComponent.cosAngle != 0 || moveComponent.sinAngle != 0) {
-                    float length = (float) Math.sqrt(moveComponent.cosAngle * moveComponent.cosAngle + moveComponent.sinAngle * moveComponent.sinAngle);
-                    moveComponent.cosAngle /= length;
-                    moveComponent.sinAngle /= length;
-                }
-                logger.debug("cosAngle: " + moveComponent.cosAngle + ", sinAngle: " + moveComponent.sinAngle);
+                moveComponent.cosAngle = playerCos;
+                moveComponent.sinAngle = playerSin;
             }
         }
     }
+
+    private boolean isMovementKey(int keycode) {
+        return keycode == Input.Keys.W || keycode == Input.Keys.A || keycode == Input.Keys.S || keycode == Input.Keys.D;
+    }
 }
+
